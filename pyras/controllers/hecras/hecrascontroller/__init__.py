@@ -84,7 +84,23 @@ class RAS500(RASController, ras500.Controller):
     """
 
     def __init__(self, filename=None):
-        self._ras_version = 'RAS503'
+        self._ras_version = 'RAS500'
         self._ras = ras500
         self._geometry = hecrasgeometry.RAS500()
         super(RAS500, self).__init__(filename)
+
+
+class RAS503(RASController, ras500.Controller):
+    """HEC-RAS Controller version RAS503 is the same as version 500.
+
+    Parameters
+    ----------
+    filename : str
+        path to a HEC-RAS project file to open (*.prj).
+    """
+
+    def __init__(self, filename=None):
+        self._ras_version = 'RAS503'
+        self._ras = ras500
+        self._geometry = hecrasgeometry.RAS503()
+        super(RAS503, self).__init__(filename)

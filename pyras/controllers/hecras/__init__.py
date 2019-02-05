@@ -187,6 +187,7 @@ class HECRASImportError(Exception):
 # kill_ras()
 __available_versions__ = get_available_versions()
 
+from .hecrascontroller import RAS503
 from .hecrascontroller import RAS500
 from .hecrascontroller import RAS41
 
