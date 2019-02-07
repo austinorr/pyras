@@ -2,7 +2,7 @@
 """
 import win32com.client
 
-from . import ras41
+from . import ras410
 from . import ras500
 
 
@@ -18,36 +18,25 @@ class RASGeometry(object):
             raise ImportError(msg)
 
 
-class RAS41(RASGeometry, ras41.Geometry):
+class RAS410(RASGeometry, ras410.Geometry):
     """HEC-RAS Geometry version RAS41."""
 
-    def __init__(self):
-        self._ras_version = 'RAS41'
-        self._ras = ras41
-        super(RAS41, self).__init__()
+    def __init__(self, version=None):
+        if version is None:
+            self._ras_version = 'RAS410'
+        else:
+            self._ras_version = 'RAS' + str(version).replace('.', '')[:-1]
+        self._ras = ras410
+        super(RAS410, self).__init__()
 
 
 class RAS500(RASGeometry, ras500.Geometry):
     """HEC-RAS Geometry version RAS500."""
 
-    def __init__(self):
-        self._ras_version = 'RAS500'
+    def __init__(self, version=None):
+        if version is None:
+            self._ras_version = 'RAS500'
+        else:
+            self._ras_version = 'RAS' + str(version).replace('.', '')
         self._ras = ras500
         super(RAS500, self).__init__()
-
-
-class RAS503(RASGeometry, ras500.Geometry):
-    """HEC-RAS Geometry version RAS500."""
-
-    def __init__(self):
-        self._ras_version = 'RAS503'
-        self._ras = ras500
-        super(RAS503, self).__init__()
-
-class RAS506(RASGeometry, ras500.Geometry):
-    """HEC-RAS Geometry version RAS500."""
-
-    def __init__(self):
-        self._ras_version = 'RAS506'
-        self._ras = ras500
-        super(RAS506, self).__init__()

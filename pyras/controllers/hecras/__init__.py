@@ -6,12 +6,35 @@ HEC-RAS Controller
 import os
 
 import win32api
+from win32api import GetFileVersionInfo, LOWORD, HIWORD
 import win32con
 from six import PY3
 
-from .hecrascontroller import RAS503, RAS506, RAS500, RAS41
+from . import hecrascontroller
 
 
+def get_controller(version=None):
+    if version is None:
+        version = max(get_installed_ras_versions())
+    
+    version = str(version).replace('.', '')
+    controller_name = 'RAS' + _get_le_controller_version(version)
+    
+    return getattr(hecrascontroller, controller_name)(version=version)
+
+
+def get_installed_ras_versions():
+    """
+    """
+    ldic = _get_registered_typelibs()
+
+    available_versions = []
+
+    for dic in ldic:
+        fname = dic['filename']
+        if os.path.isfile(fname):
+            available_versions.append(dic['version'])
+    return available_versions
 
 
 def kill_ras():
@@ -41,24 +64,27 @@ def kill_ras():
             print(e)
 
 
-def get_available_versions():
-    """ """
-    ver = {'HEC-RAS\\4.1.0\\ras.exe': 'RAS41',
-           'HEC-RAS\\5.0 Beta 2014-10-01\\ras.exe': 'RAS500'}
+def _get_controller_versions():
+    controller_versions = []
+    for attr in dir(hecrascontroller):
+        if 'RAS' in attr:
+            _, ver = attr.split('RAS')
+            controller_versions.append(ver)
+    
+    return controller_versions
 
-    ldic = _get_registered_typelibs()
 
-    # Check if files actually exist (another sanity check)
-    available_versions = []
-
-    for dic in ldic:
-        fname = dic['filename']
-        if os.path.isfile(fname):
-            for k in ver:
-                if k in fname:
-                    available_versions.append(ver[k])
-    return available_versions
-
+def _get_le_controller_version(version):
+    """
+    version : str
+        version string e.g., 410
+    """
+    avail_controller_versions = sorted(_get_controller_versions())[::-1]
+    for avail_ver in avail_controller_versions:
+        if avail_ver <= version:
+            return avail_ver
+    raise ValueError('version not found: ', version)
+        
 
 def _get_typelib_info(keyid, version):
     """
@@ -120,6 +146,16 @@ def _get_typelib_info(keyid, version):
     return fname, lcid
 
 
+def _get_ras_version_number(filename):
+    try:
+        info = GetFileVersionInfo(filename, "\\")
+        ms = info['FileVersionMS']
+        ls = info['FileVersionLS']
+        return HIWORD(ms), LOWORD(ms), LOWORD(ls)  # major, minor, revision
+    except:
+        return 0, 0, 0
+
+
 def _get_registered_typelibs(match='HEC River Analysis System'):
     """
     adapted from pywin32
@@ -140,13 +176,18 @@ def _get_registered_typelibs(match='HEC River Analysis System'):
             sub_key = win32api.RegOpenKey(key, key_name)
             name = None
             try:
-                sub_num = 0
+                sub_num = -1
                 best_version = 0.0
                 while 1:
+                   
                     try:
+                        sub_num = sub_num + 1
                         version_str = win32api.RegEnumKey(sub_key, sub_num)
+                        
+
                     except win32api.error:
                         break
+                    
                     try:
                         version_flt = float(version_str)
                     except ValueError:
@@ -154,21 +195,26 @@ def _get_registered_typelibs(match='HEC River Analysis System'):
                     if version_flt > best_version:
                         best_version = version_flt
                         name = win32api.RegQueryValue(sub_key, version_str)
-                    sub_num = sub_num + 1
+                    
             finally:
                 win32api.RegCloseKey(sub_key)
             if name is not None and match in name:
                 fname, lcid = _get_typelib_info(key_name, version_str)
 
                 # Split version
-                major, minor = version_str.split('.')
+                major, minor, rev = _get_ras_version_number(fname)
 
-                result.append({'name': name,
-                               'filename': fname,
-                               'iid': key_name,
-                               'lcid': lcid,
-                               'major': int(major),
-                               'minor': int(minor)})
+                dct = {
+                    'name': name,
+                    'filename': fname,
+                    'lcid': lcid,
+                    'version': ".".join(map(str, [major, minor, rev])),
+                    'major': int(major),
+                    'minor': int(minor),
+                    'revision': int(rev),
+                }
+
+                result.append(dct)
             num = num + 1
     finally:
         win32api.RegCloseKey(key)
@@ -189,4 +235,4 @@ class HECRASImportError(Exception):
 
 # %%
 # kill_ras()
-__available_versions__ = get_available_versions()
+# __available_versions__ = get_available_versions()

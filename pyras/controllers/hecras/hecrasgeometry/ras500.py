@@ -1,8 +1,8 @@
 
-from . import ras41
+from . import ras410
 
 
-class Geometry(ras41.Geometry):
+class Geometry(ras410.Geometry):
     """HECRAS Geomerty version RAS500."""
 
     def __init__(self):
