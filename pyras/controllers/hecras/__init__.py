@@ -4,6 +4,7 @@ HEC-RAS Controller
 """
 
 import os
+import functools
 
 import win32api
 from win32api import GetFileVersionInfo, LOWORD, HIWORD
@@ -13,16 +14,37 @@ from six import PY3
 from . import hecrascontroller
 
 
+def partialcontroller(cls, *args, **kwds):
+
+    class Controller(cls):
+        __init__ = functools.partialmethod(cls.__init__, *args, **kwds)
+
+    return Controller
+
+
 def get_controller(exe_version=None):
+
+    installed_versions = [_.replace('.', '')
+                          for _ in get_installed_ras_versions()]
+
     if exe_version is None:
-        exe_version = max(get_installed_ras_versions())
+        exe_version = max(installed_versions)
 
     version = str(exe_version).replace('.', '')
-    controller_name = 'RAS' + _get_le_controller_version(version)
 
-    rc = getattr(hecrascontroller, controller_name)
+    if version not in installed_versions:
+        raise ValueError('not installed {}'.format(version))
 
-    return rc(exe_version=version)
+    controller_version = _get_le_controller_version(version)
+    controller_name = 'RAS' + controller_version
+
+    controller = getattr(hecrascontroller, controller_name)
+
+    progid = controller_name
+    if version >= "500":
+        progid = 'RAS' + version
+
+    return partialcontroller(controller, progid=progid)
 
 
 def get_installed_ras_versions():
@@ -234,6 +256,5 @@ class HECRASImportError(Exception):
         super(HECRASImportError, self).__init__(msg)
 
 
-# %%
 # kill_ras()
 # __available_versions__ = get_available_versions()
