@@ -9,6 +9,10 @@ import win32api
 import win32con
 from six import PY3
 
+from .hecrascontroller import RAS503, RAS506, RAS500, RAS41
+
+
+
 
 def kill_ras():
     """ """
@@ -186,14 +190,3 @@ class HECRASImportError(Exception):
 # %%
 # kill_ras()
 __available_versions__ = get_available_versions()
-
-from .hecrascontroller import RAS503
-from .hecrascontroller import RAS500
-from .hecrascontroller import RAS41
-
-# Cleaning the namespace
-globals().pop('hecrascontroller')
-globals().pop('hecrasgeometry')
-globals().pop('win32api')
-globals().pop('win32con')
-globals().pop('runtime')

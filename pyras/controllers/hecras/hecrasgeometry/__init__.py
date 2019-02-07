@@ -43,3 +43,11 @@ class RAS503(RASGeometry, ras500.Geometry):
         self._ras_version = 'RAS503'
         self._ras = ras500
         super(RAS503, self).__init__()
+
+class RAS506(RASGeometry, ras500.Geometry):
+    """HEC-RAS Geometry version RAS500."""
+
+    def __init__(self):
+        self._ras_version = 'RAS506'
+        self._ras = ras500
+        super(RAS506, self).__init__()
