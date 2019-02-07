@@ -13,14 +13,16 @@ from six import PY3
 from . import hecrascontroller
 
 
-def get_controller(version=None):
-    if version is None:
-        version = max(get_installed_ras_versions())
-    
-    version = str(version).replace('.', '')
+def get_controller(exe_version=None):
+    if exe_version is None:
+        exe_version = max(get_installed_ras_versions())
+
+    version = str(exe_version).replace('.', '')
     controller_name = 'RAS' + _get_le_controller_version(version)
-    
-    return getattr(hecrascontroller, controller_name)(version=version)
+
+    rc = getattr(hecrascontroller, controller_name)
+
+    return rc(exe_version=version)
 
 
 def get_installed_ras_versions():
@@ -70,7 +72,7 @@ def _get_controller_versions():
         if 'RAS' in attr:
             _, ver = attr.split('RAS')
             controller_versions.append(ver)
-    
+
     return controller_versions
 
 
@@ -84,7 +86,7 @@ def _get_le_controller_version(version):
         if avail_ver <= version:
             return avail_ver
     raise ValueError('version not found: ', version)
-        
+
 
 def _get_typelib_info(keyid, version):
     """
@@ -179,15 +181,14 @@ def _get_registered_typelibs(match='HEC River Analysis System'):
                 sub_num = -1
                 best_version = 0.0
                 while 1:
-                   
+
                     try:
                         sub_num = sub_num + 1
                         version_str = win32api.RegEnumKey(sub_key, sub_num)
-                        
 
                     except win32api.error:
                         break
-                    
+
                     try:
                         version_flt = float(version_str)
                     except ValueError:
@@ -195,7 +196,7 @@ def _get_registered_typelibs(match='HEC River Analysis System'):
                     if version_flt > best_version:
                         best_version = version_flt
                         name = win32api.RegQueryValue(sub_key, version_str)
-                    
+
             finally:
                 win32api.RegCloseKey(sub_key)
             if name is not None and match in name:
