@@ -4,7 +4,6 @@ PyRAS
 
 
 """
+from .controllers import kill_ras, ras_constants, get_controller
 
-__version__ = '0.2.1dev'
-
-from . import controllers
+__version__ = '0.3.0'

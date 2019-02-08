@@ -1218,7 +1218,7 @@ class ControllerBase(object):
         Returns
         -------
         nProfile : int
-            The rive ID.
+            The number of profiles for the current plan.
         ProfileName : str
             A list of profile names.
 

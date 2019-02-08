@@ -2,8 +2,7 @@
 """
 import win32com.client
 
-from . import ras41
-from . import ras500
+from . import ras500, ras41
 
 
 class RASGeometry(object):
@@ -21,8 +20,8 @@ class RASGeometry(object):
 class RAS41(RASGeometry, ras41.Geometry):
     """HEC-RAS Geometry version RAS41."""
 
-    def __init__(self):
-        self._ras_version = 'RAS41'
+    def __init__(self, progid='RAS41'):
+        self._ras_version = progid
         self._ras = ras41
         super(RAS41, self).__init__()
 
@@ -30,7 +29,7 @@ class RAS41(RASGeometry, ras41.Geometry):
 class RAS500(RASGeometry, ras500.Geometry):
     """HEC-RAS Geometry version RAS500."""
 
-    def __init__(self):
-        self._ras_version = 'RAS503'
+    def __init__(self, progid='RAS500'):
+        self._ras_version = progid
         self._ras = ras500
         super(RAS500, self).__init__()
